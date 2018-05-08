@@ -8,7 +8,6 @@ import robotaUA.GeneralPage;
 import robotaUA.SearchResaultPage;
 
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 public class VacantionsQaAutoTest extends TestBase {
@@ -34,13 +33,14 @@ public class VacantionsQaAutoTest extends TestBase {
     @Test
     public void vacantionsTest() {
         kievVacantion = searchForJobs("Киев");
-        dneprVaCnation = searchForJobs("Днепр");
-        lvivVaCantion = searchForJobs("Львов");
         kievVacantion.forEach(System.out::println);
+       /* dneprVaCnation = searchForJobs("Днепр");
+        lvivVaCantion = searchForJobs("Львов");
+
         System.out.println("------------");
         dneprVaCnation.forEach(System.out::println);
         System.out.println("------------");
-        lvivVaCantion.forEach(System.out::println);
+        lvivVaCantion.forEach(System.out::println);*/
 
     }
 
@@ -60,29 +60,51 @@ public class VacantionsQaAutoTest extends TestBase {
         waitFor(1);
         int j = counterOfVacantion;
         String companyName;
-        int allVacantions = openedSearchPage.vacations().getElements("//table[@id=\"content_vacancyList_gridList\"]/tbody/tr").size()-1;
-        System.out.println(allVacantions);
+        int allVacantions = openedSearchPage.vacations().getElements("//table[@id=\"content_vacancyList_gridList\"]/tbody/tr").size() - 1;
+        log("readied vancies : "+allVacantions);
         for (int i = 1; i <= j; i++) {
-            if (i <= allVacantions) {
-                companyName = openedSearchPage.vacations().getCompanyName(i).getText();
-                System.out.println(companyName);
-                if (companyName.contains("Automation") || companyName.contains("Test")) {
-                    arrForThisMethod.add("city of vacantion : "
-                            + city + " name of company : "
-                            + companyName
-                            + " name of vacantion : "
-                            + openedSearchPage.vacations().getVacantionName(i).getText()
-                            + " date of publication is : "
-                            + getDataOfPublication(i));
+            System.out.println(i);
+            if (i <= allVacantions ) {
+                if(checkTimeOfVacation(i)) {
+                    System.out.println(checkTimeOfVacation(i));
+                    companyName = openedSearchPage.vacations().getCompanyName(i).getText();
+                    System.out.println(companyName);
+                    if (companyName.contains("Automation") || companyName.contains("Test")) {
+                        arrForThisMethod.add("city of vacantion : "
+                                + city + " name of company : "
+                                + companyName
+                                + " name of vacantion : "
+                                + openedSearchPage.vacations().getVacantionName(i).getText()
+                                + " date of publication is : "
+                                + getDataOfPublication(i));
 
-                } else j++;
+                    } else j++;
+                }else j++;
             } else break;
         }
         return arrForThisMethod;
     }
 
+   /* private void recurs(int z){
+           if(checkTimeOfVacation(z)) {
+                    System.out.println(checkTimeOfVacation(z));
+                    companyName = openedSearchPage.vacations().getCompanyName(z).getText();
+                    System.out.println(companyName);
+                    if (companyName.contains("Automation") || companyName.contains("Test")) {
+                        arrForThisMethod.add("city of vacantion : "
+                                + city + " name of company : "
+                                + companyName
+                                + " name of vacantion : "
+                                + openedSearchPage.vacations().getVacantionName(z).getText()
+                                + " date of publication is : "
+                                + getDataOfPublication(z));
 
-    public String getDataOfPublication(int i) {
+                    } else j++;
+                }else j++;
+    }*/
+
+
+    private String getDataOfPublication(int i) {
         String time;
         log("get data click");
         openedSearchPage.vacations().getLinkByCompanyName(i).click();
@@ -95,20 +117,17 @@ public class VacantionsQaAutoTest extends TestBase {
 
 
     private boolean checkTimeOfVacation(int numberOfVacation) {
-        log("checkTimeOfVacation");
-        String timeValue;
-        try {
-            timeValue = openedSearchPage.vacations().getTimeValue(numberOfVacation).getText();
-            System.out.println(timeValue);
-        } catch (Exception e) {
-            e.getStackTrace();
-            log("Not a time of public vacation on page");
-            return false;
-        }
-        return true;
+       String fullDayOfPublication = getDataOfPublication(numberOfVacation);
+       String dayOfPublication = fullDayOfPublication.charAt(0)+ "" + fullDayOfPublication.charAt(1)+"";
+        String curentDay = getCurentDay();
+        boolean b = (Integer.parseInt(dayOfPublication) + 3) <= Integer.parseInt(getCurentDay());
+        System.out.println(b);
+        log("dayOfPublication" + dayOfPublication + "CurentDay " + curentDay + "boolean resalt is : " + b);
+        return b;
     }
 
-    @AfterMethod
+
+  //  @AfterMethod
     public void tearDown() {
         driver.close();
     }
